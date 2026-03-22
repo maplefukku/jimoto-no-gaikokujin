@@ -4,6 +4,10 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { REGIONS, LANGUAGES, INTERESTS, GENDERS } from '@/lib/constants'
 import InterestTagSelector from './InterestTagSelector'
+import InputField from './ui/InputField'
+import SelectField from './ui/SelectField'
+import TextareaField from './ui/TextareaField'
+import CheckboxField from './ui/CheckboxField'
 import type { Profile } from '@/types/database'
 import { useRouter } from 'next/navigation'
 
@@ -27,6 +31,10 @@ export default function ProfileEditForm({ profile }: ProfileEditFormProps) {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const router = useRouter()
+
+  function updateField<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
+    setForm((prev) => ({ ...prev, [key]: value }))
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -61,121 +69,80 @@ export default function ProfileEditForm({ profile }: ProfileEditFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      <div>
-        <label className="block text-sm font-medium text-gray-700">名前</label>
-        <input
-          type="text"
-          required
-          value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-          className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-pink-500 focus:ring-pink-500 focus:outline-none"
-          placeholder="あなたの名前"
-        />
-      </div>
+      <InputField
+        label="名前"
+        required
+        value={form.name}
+        onChange={(e) => updateField('name', e.target.value)}
+        placeholder="あなたの名前"
+      />
 
       <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">年齢</label>
-          <input
-            type="number"
-            required
-            min={18}
-            max={100}
-            value={form.age}
-            onChange={(e) => setForm({ ...form, age: parseInt(e.target.value) || 18 })}
-            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-pink-500 focus:ring-pink-500 focus:outline-none"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700">性別</label>
-          <select
-            value={form.gender}
-            onChange={(e) => setForm({ ...form, gender: e.target.value })}
-            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-pink-500 focus:ring-pink-500 focus:outline-none"
-          >
-            <option value="">選択してください</option>
-            {GENDERS.map((g) => (
-              <option key={g} value={g}>{g}</option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      <div>
-        <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-          <input
-            type="checkbox"
-            checked={form.is_foreigner}
-            onChange={(e) => setForm({ ...form, is_foreigner: e.target.checked })}
-            className="rounded border-gray-300 text-pink-600 focus:ring-pink-500"
-          />
-          外国人です（日本在住の外国人の方はチェック）
-        </label>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700">都道府県</label>
-        <select
-          value={form.region}
-          onChange={(e) => setForm({ ...form, region: e.target.value })}
-          className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-pink-500 focus:ring-pink-500 focus:outline-none"
-        >
-          <option value="">選択してください</option>
-          {REGIONS.map((r) => (
-            <option key={r} value={r}>{r}</option>
-          ))}
-        </select>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700">市区町村</label>
-        <input
-          type="text"
-          value={form.city}
-          onChange={(e) => setForm({ ...form, city: e.target.value })}
-          className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-pink-500 focus:ring-pink-500 focus:outline-none"
-          placeholder="例: 渋谷区"
+        <InputField
+          label="年齢"
+          type="number"
+          required
+          min={18}
+          max={100}
+          value={form.age}
+          onChange={(e) => updateField('age', parseInt(e.target.value) || 18)}
+        />
+        <SelectField
+          label="性別"
+          options={GENDERS}
+          value={form.gender}
+          onChange={(e) => updateField('gender', e.target.value)}
         />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700">母国語</label>
-        <select
-          value={form.native_language}
-          onChange={(e) => setForm({ ...form, native_language: e.target.value })}
-          className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-pink-500 focus:ring-pink-500 focus:outline-none"
-        >
-          <option value="">選択してください</option>
-          {LANGUAGES.map((l) => (
-            <option key={l} value={l}>{l}</option>
-          ))}
-        </select>
-      </div>
+      <CheckboxField
+        label="外国人です（日本在住の外国人の方はチェック）"
+        checked={form.is_foreigner}
+        onChange={(e) => updateField('is_foreigner', e.target.checked)}
+      />
+
+      <SelectField
+        label="都道府県"
+        options={REGIONS}
+        value={form.region}
+        onChange={(e) => updateField('region', e.target.value)}
+      />
+
+      <InputField
+        label="市区町村"
+        value={form.city}
+        onChange={(e) => updateField('city', e.target.value)}
+        placeholder="例: 渋谷区"
+      />
+
+      <SelectField
+        label="母国語"
+        options={LANGUAGES}
+        value={form.native_language}
+        onChange={(e) => updateField('native_language', e.target.value)}
+      />
 
       <InterestTagSelector
         label="学習中の言語"
         options={LANGUAGES}
         selected={form.learning_languages}
-        onChange={(learning_languages) => setForm({ ...form, learning_languages })}
+        onChange={(learning_languages) => updateField('learning_languages', learning_languages)}
       />
 
       <InterestTagSelector
         label="興味・趣味"
         options={INTERESTS}
         selected={form.interests}
-        onChange={(interests) => setForm({ ...form, interests })}
+        onChange={(interests) => updateField('interests', interests)}
       />
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700">自己紹介</label>
-        <textarea
-          value={form.bio}
-          onChange={(e) => setForm({ ...form, bio: e.target.value })}
-          rows={3}
-          className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-pink-500 focus:ring-pink-500 focus:outline-none"
-          placeholder="自分について教えてください..."
-        />
-      </div>
+      <TextareaField
+        label="自己紹介"
+        value={form.bio}
+        onChange={(e) => updateField('bio', e.target.value)}
+        rows={3}
+        placeholder="自分について教えてください..."
+      />
 
       {message && (
         <p className={`text-sm ${message.includes('失敗') ? 'text-red-600' : 'text-green-600'}`}>

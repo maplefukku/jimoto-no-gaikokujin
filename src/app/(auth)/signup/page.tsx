@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import InputField from '@/components/ui/InputField'
+import CheckboxField from '@/components/ui/CheckboxField'
 
 export default function SignupPage() {
   const [email, setEmail] = useState('')
@@ -53,60 +55,38 @@ export default function SignupPage() {
 
   return (
     <form onSubmit={handleSignup} className="space-y-4">
-      <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-          メールアドレス
-        </label>
-        <input
-          id="email"
-          type="email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-pink-500 focus:ring-pink-500 focus:outline-none"
-          placeholder="example@email.com"
-        />
-      </div>
+      <InputField
+        label="メールアドレス"
+        type="email"
+        required
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="example@email.com"
+      />
 
-      <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-          パスワード
-        </label>
-        <input
-          id="password"
-          type="password"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-pink-500 focus:ring-pink-500 focus:outline-none"
-          placeholder="6文字以上"
-        />
-      </div>
+      <InputField
+        label="パスワード"
+        type="password"
+        required
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        placeholder="6文字以上"
+      />
 
-      <div>
-        <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-          パスワード（確認）
-        </label>
-        <input
-          id="confirmPassword"
-          type="password"
-          required
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-pink-500 focus:ring-pink-500 focus:outline-none"
-          placeholder="パスワードを再入力"
-        />
-      </div>
+      <InputField
+        label="パスワード（確認）"
+        type="password"
+        required
+        value={confirmPassword}
+        onChange={(e) => setConfirmPassword(e.target.value)}
+        placeholder="パスワードを再入力"
+      />
 
-      <label className="flex items-center gap-2 text-sm text-gray-700">
-        <input
-          type="checkbox"
-          checked={ageConfirm}
-          onChange={(e) => setAgeConfirm(e.target.checked)}
-          className="rounded border-gray-300 text-pink-600 focus:ring-pink-500"
-        />
-        18歳以上であることを確認します
-      </label>
+      <CheckboxField
+        label="18歳以上であることを確認します"
+        checked={ageConfirm}
+        onChange={(e) => setAgeConfirm(e.target.checked)}
+      />
 
       {error && (
         <p className="text-sm text-red-600">{error}</p>

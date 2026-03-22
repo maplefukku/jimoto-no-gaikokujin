@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import InputField from '@/components/ui/InputField'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -32,35 +33,23 @@ export default function LoginPage() {
 
   return (
     <form onSubmit={handleLogin} className="space-y-4">
-      <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-          メールアドレス
-        </label>
-        <input
-          id="email"
-          type="email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-pink-500 focus:ring-pink-500 focus:outline-none"
-          placeholder="example@email.com"
-        />
-      </div>
+      <InputField
+        label="メールアドレス"
+        type="email"
+        required
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="example@email.com"
+      />
 
-      <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-          パスワード
-        </label>
-        <input
-          id="password"
-          type="password"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-pink-500 focus:ring-pink-500 focus:outline-none"
-          placeholder="パスワード"
-        />
-      </div>
+      <InputField
+        label="パスワード"
+        type="password"
+        required
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        placeholder="パスワード"
+      />
 
       {error && (
         <p className="text-sm text-red-600">{error}</p>

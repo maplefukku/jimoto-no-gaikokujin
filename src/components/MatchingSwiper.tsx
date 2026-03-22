@@ -3,8 +3,9 @@
 import { useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import MatchingCard from './MatchingCard'
+import MatchSuccess from './matching/MatchSuccess'
+import NoMoreCandidates from './matching/NoMoreCandidates'
 import type { Profile } from '@/types/database'
-import { useRouter } from 'next/navigation'
 
 interface MatchingSwiperProps {
   candidates: Profile[]
@@ -14,7 +15,6 @@ interface MatchingSwiperProps {
 export default function MatchingSwiper({ candidates, currentUserId }: MatchingSwiperProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [matchedUser, setMatchedUser] = useState<Profile | null>(null)
-  const router = useRouter()
 
   const handleLike = useCallback(async () => {
     const target = candidates[currentIndex]
@@ -22,16 +22,10 @@ export default function MatchingSwiper({ candidates, currentUserId }: MatchingSw
 
     const supabase = createClient()
 
-    // いいねを送信
-    const { error: likeError } = await supabase
+    await supabase
       .from('matches')
       .insert({ from_user_id: currentUserId, to_user_id: target.id, status: 'pending' })
 
-    if (likeError) {
-      // already liked - skip
-    }
-
-    // 相互いいねチェック
     const { data: mutual } = await supabase
       .from('matches')
       .select('*')
@@ -41,7 +35,6 @@ export default function MatchingSwiper({ candidates, currentUserId }: MatchingSw
       .single()
 
     if (mutual) {
-      // マッチング成立！
       await supabase.from('matches').update({ status: 'matched' }).eq('id', mutual.id)
       await supabase
         .from('matches')
@@ -49,7 +42,6 @@ export default function MatchingSwiper({ candidates, currentUserId }: MatchingSw
         .eq('from_user_id', currentUserId)
         .eq('to_user_id', target.id)
 
-      // チャットルーム作成
       const [id1, id2] = [currentUserId, target.id].sort()
       await supabase
         .from('chat_rooms')
@@ -67,38 +59,15 @@ export default function MatchingSwiper({ candidates, currentUserId }: MatchingSw
 
   if (matchedUser) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <div className="text-6xl mb-4">🎉</div>
-        <h2 className="text-2xl font-bold text-pink-600 mb-2">マッチング成立！</h2>
-        <p className="text-gray-600 mb-6">
-          {matchedUser.name}さんとマッチしました！
-        </p>
-        <div className="flex gap-3">
-          <button
-            onClick={() => { setMatchedUser(null) }}
-            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-          >
-            続ける
-          </button>
-          <button
-            onClick={() => router.push('/chat')}
-            className="rounded-lg bg-pink-600 px-4 py-2 text-sm font-medium text-white hover:bg-pink-500"
-          >
-            チャットへ
-          </button>
-        </div>
-      </div>
+      <MatchSuccess
+        matchedUser={matchedUser}
+        onContinue={() => setMatchedUser(null)}
+      />
     )
   }
 
   if (currentIndex >= candidates.length) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <div className="text-5xl mb-4">😊</div>
-        <h2 className="text-lg font-semibold text-gray-700">今日の候補はこれで全部です</h2>
-        <p className="mt-2 text-sm text-gray-500">また後でチェックしてみてください</p>
-      </div>
-    )
+    return <NoMoreCandidates />
   }
 
   return (
